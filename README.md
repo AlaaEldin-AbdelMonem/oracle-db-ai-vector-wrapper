@@ -70,7 +70,7 @@ I created the centeral ai schema and name it "AI", you change to whatever your c
 │       Consumer Schemas                 │
 │   DBuser1   DBuser2                    │
 │      ↓      ↓                          │
-│   Call AI.PKG_AI_VECTOR_UTIL.*()       │
+│   Call AI.AI_VECTOR_UTIL.*()           │
 └────────────────────────────────────────┘
 ```
 
@@ -108,13 +108,16 @@ I created the centeral ai schema and name it "AI", you change to whatever your c
 ## 📋 Prerequisites
 
 ### Database Requirements
-- Oracle Database 23ai with AI Vector Search
-- DBMS_VECTOR package available
-- DBMS_CLOUD package (for model loading)
+- Oracle Database 23ai with AI Vector Search or above
+- DBMS_VECTOR package available (seeded with 23ai, no install required)
+- DBMS_CLOUD package (for model loading , (seeded with 23ai, no install required))
  
 
 ### Privileges Needed (AI Schema)
 ```sql
+--Create a any new or existing Schema, the only purpose is to hold installed AI embdedding Models, I named it "AI", You can replace by any Name
+CREATE USER AI IDENTIFIED BY app_password DEFAULT TABLESPACE users QUOTA UNLIMITED ON users;
+
 -- AI schema must have:
 GRANT CREATE TABLE TO AI;
 GRANT CREATE PROCEDURE TO AI;
@@ -137,7 +140,13 @@ GRANT READ, WRITE ON DIRECTORY ONNX_DIR TO AI;
 ---
 
 ## 🚀 Installation Guide
-
+```sql
+-- Connect as ADMIN/DBA
+CONNECT admin/password@database
+create 
+```
+### Step 0: Create AI Schema
+ Cre
 ### Step 1: Prepare AI Schema
 
 ```sql
@@ -197,7 +206,7 @@ WHERE object_name = 'AI_VECTOR_UTIL';
 CONNECT AI100/password@database
 
 -- Create synonym
-CREATE OR REPLACE SYNONYM ai_vector_Utx FOR AI.ai_vector_util;
+CREATE OR REPLACE SYNONYM ai_vector_Utx FOR AI.ai_vector_util;  (Optional, You can directly refer to package AI.ai_vector_util )
 ```
 
 ### Step 7: Test Installation (Consumer Schema)
@@ -205,6 +214,7 @@ CREATE OR REPLACE SYNONYM ai_vector_Utx FOR AI.ai_vector_util;
 ```sql
 -- Run comprehensive test script
 select  ai.ai_vector_util.generate_embedding( 'الحمد لله رب العالمين') embd from dual;
+--Or based on synonym "ai_vector_utx" for "ai.ai_vector_util"--if you created the synonym
 select ai_vector_utx.generate_embedding( 'الحمد لله رب العالمين') embd from dual;
 ```
 
@@ -215,7 +225,8 @@ select ai_vector_utx.generate_embedding( 'الحمد لله رب العالمي�
 ### Basic Embedding Generation
 
 ```sql
-select ai_vector_utx.generate_embedding( 'PM Copilot is an AI-powered APEX application') embd from dual;
+select ai.ai_vector_util.generate_embedding( 'PM Copilot is an AI-powered APEX application') embd from dual;
+select    ai_vector_utx.generate_embedding( 'PM Copilot is an AI-powered APEX application') embd from dual;
 ```
 
 ### Batch Processing
@@ -225,6 +236,7 @@ DECLARE
     TYPE text_array IS TABLE OF CLOB INDEX BY PLS_INTEGER;
     v_texts text_array;
     v_embeddings ai_vector_utx.t_vector_array;
+  --v_embeddings ai.ai_vector_util.t_vector_array;
 BEGIN
     v_texts(1) := 'First document';
     v_texts(2) := 'Second document';
@@ -251,7 +263,7 @@ DECLARE
 BEGIN
     -- Search for similar documents
     v_results := ai_vector_utx.similarity_search(
-        p_query_vector => pkg_ai_vector_util.generate_embedding(v_query_text),
+        p_query_vector => ai_vector_util.generate_embedding(v_query_text),
         p_schema_name => '<<<<schema name>>',
         p_table_name => 'PM_DOCUMENT_CHUNKS',
         p_vector_column => 'EMBEDDING',
@@ -454,9 +466,9 @@ END;
 
 | File | Purpose |
 |------|---------|
-| `pm_copilot_ai_wrapper_design.md` | Complete architecture design document |
-| `pkg_ai_vector_util_spec.sql` | Package specification (interface) |
-| `pkg_ai_vector_util_body.sql` | Package body (implementation) |
+ 
+| `ai_vector_util_spec.sql` | Package specification (interface) |
+| `ai_vector_util_body.sql` | Package body (implementation) |
 | `ai_metadata_tables.sql` | Supporting tables and views |
 | `grant_ai_access.sql` | Grant script for consumer schemas |
 | `test_ai_wrapper.sql` | Comprehensive test suite |
