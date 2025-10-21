@@ -51,7 +51,7 @@ I created the centeral ai schema and name it "AI", you change to whatever your c
 │  └──────────────────────────────────┘  │
 │               ↓                        │
 │  ┌──────────────────────────────────┐  │
-│  │   PKG_AI_VECTOR_UTIL Package     │  │
+│  │     AI_VECTOR_UTIL Package       │  │
 │  │   • generate_embedding()         │  │
 │  │   • similarity_search()          │  │
 │  │   • semantic_search()            │  │
